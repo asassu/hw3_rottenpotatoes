@@ -21,11 +21,26 @@ end
 #  "When I uncheck the following ratings: PG, G, R"
 #  "When I check the following ratings: G"
 
+
 When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|
+  if uncheck == "un"
+    rating_list.split(', ').each {|x| step %{I uncheck "ratings_#{x}"}}
+  else
+    rating_list.split(', ').each {|x| step %{I check "ratings_#{x}"}}
+  end
   # HINT: use String#split to split up the rating_list, then
-  #   iterate over the ratings and reuse the "When I check..." or
-  #   "When I uncheck..." steps in lines 89-95 of web_steps.rb
-	rating_list.split(' ').each do |x|
-		uncheck == true ? uncheck(x) : check(x)
-	end
+  # iterate over the ratings and reuse the "When I check..." or
+  # "When I uncheck..." steps in lines 89-95 of web_steps.rb
+end
+
+Then /I should not see any of the movies/ do
+	value = 5 #Hard coded, not ideal: number of G and PG-13 rated movies
+	rows = page.all('#movies tr').size - 1
+	assert rows == Movie.count() - value
+end
+
+Then /I should see all of the movies/ do
+	value = 5 #hard coded, not ideal: number of PG and R rated movies
+	rows = page.all('#movies tr').size - 1
+	assert rows == value
 end
